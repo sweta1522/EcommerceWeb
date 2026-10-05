@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar" aria-label="Product dashboard header">
+        <div>
+          <p class="eyebrow">Commerce</p>
+          <h1>Product Dashboard</h1>
+        </div>
+        <div class="toolbar" aria-label="Product filters and pagination controls">
+          <label class="control-field search-field" for="searchInput">
+            <span class="control-label">Search</span>
+            <input id="searchInput" type="search" placeholder="Search products" aria-label="Search products" />
+          </label>
+          <label class="control-field" for="categoryFilter">
+            <span class="control-label">Category</span>
+            <select id="categoryFilter" aria-label="Filter products by category">
+              <option value="all">All</option>
+            </select>
+          </label>
+          <label class="control-field" for="sortByPrice">
+            <span class="control-label">Sort by price</span>
+            <select id="sortByPrice" aria-label="Sort products by price">
+              <option value="price_asc">Low to high</option>
+              <option value="price_desc">High to low</option>
+            </select>
+          </label>
+          <label class="control-field" for="pageSizeSelect">
+            <span class="control-label">Page size</span>
+            <select id="pageSizeSelect" aria-label="Select number of products per page">
+              <option value="10">10</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </label>
+          <button id="cartLinkBtn" type="button" class="cart-link" aria-label="View cart" aria-pressed="false">
+            <span class="cart-link-text">Cart</span>
+            <span id="cartBadge" class="cart-badge">0</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="summary" aria-label="Product statistics">
+        <div class="summary-card" aria-live="polite">
+          <span>Total products</span>
+          <strong id="totalProducts">0</strong>
+        </div>
+        <div class="summary-card" aria-live="polite">
+          <span>Current page</span>
+          <strong id="currentPageLabel">1 / 1</strong>
+        </div>
+      </section>
+
+      <section class="content-layout">
+        <div class="grid-panel" aria-label="Product listing">
+          <div class="product-grid" id="productGrid" aria-live="polite"></div>
+        </div>
+
+        <aside class="cart-panel" aria-label="Shopping cart">
+          <div class="cart-header">
+            <h2>Cart</h2>
+            <span id="cartCount" class="cart-count">0 items</span>
+            <button id="continueShoppingBtn" type="button" class="continue-shopping" aria-label="Continue shopping">
+              Continue shopping
+            </button>
+          </div>
+
+          <div id="cartItems" class="cart-items" aria-live="polite"></div>
+
+          <div class="cart-footer">
+            <div class="cart-total-row">
+              <span>Total</span>
+              <strong id="cartTotal">$0.00</strong>
+            </div>
+            <button id="buyCartBtn" type="button" class="buy-button" aria-label="Buy products in cart">
+              Buy items
+            </button>
+          </div>
+        </aside>
+      </section>
+
+      <div id="productModal" class="product-modal" aria-hidden="true">
+        <div class="product-modal-backdrop" data-close-modal="true"></div>
+        <div class="product-modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+          <button type="button" class="close-modal" aria-label="Close product details">×</button>
+          <div class="product-hero" id="modalHero">
+            <img id="modalImage" src="" alt="Product preview" />
+          </div>
+          <div class="product-modal-body">
+            <span class="modal-category" id="modalCategory">Category</span>
+            <h2 id="modalTitle">Product</h2>
+            <div class="modal-meta">
+              <div>
+                <span class="label">Price</span>
+                <strong id="modalPrice">$0.00</strong>
+              </div>
+              <div>
+                <span class="label">Stock</span>
+                <strong id="modalStock">0</strong>
+              </div>
+            </div>
+            <div class="modal-details">
+              <p><strong>SKU:</strong> <span id="modalSku">-</span></p>
+              <p><strong>ID:</strong> <span id="modalId">-</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="pagination-bar" aria-label="Pagination controls">
+        <button id="prevPageBtn" type="button" aria-label="Go to previous page">Previous</button>
+        <div id="pageNumbers" class="page-numbers" aria-label="Page numbers"></div>
+        <button id="nextPageBtn" type="button" aria-label="Go to next page">Next</button>
+      </footer>
+    </div>
+
+    <script src="/Cart.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
