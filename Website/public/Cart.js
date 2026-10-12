@@ -71,16 +71,16 @@ class CartComponent {
         (item) => `
           <div class="cart-item">
             <div class="cart-item-image">
-              <img src="${getProductImage(item)}" alt="${item.title}" />
+              <img src="${getProductImage(item)}" alt="${escapeHtml(item.title)}" />
             </div>
             <div class="cart-item-details">
-              <h3>${item.title}</h3>
+              <h3>${escapeHtml(item.title)}</h3>
               <p>${formatPrice(item.price)}</p>
               <div class="cart-item-actions">
-                <button type="button" data-cart-action="decrease" data-product-id="${item.product_id}" aria-label="Decrease quantity for ${item.title}">-</button>
+                <button type="button" data-cart-action="decrease" data-product-id="${item.product_id}" aria-label="Decrease quantity for ${escapeHtml(item.title)}">-</button>
                 <span>${item.quantity}</span>
-                <button type="button" data-cart-action="increase" data-product-id="${item.product_id}" aria-label="Increase quantity for ${item.title}">+</button>
-                <button type="button" class="remove-cart-item" data-cart-action="remove" data-product-id="${item.product_id}" aria-label="Remove ${item.title} from cart">Remove</button>
+                <button type="button" data-cart-action="increase" data-product-id="${item.product_id}" aria-label="Increase quantity for ${escapeHtml(item.title)}">+</button>
+                <button type="button" class="remove-cart-item" data-cart-action="remove" data-product-id="${item.product_id}" aria-label="Remove ${escapeHtml(item.title)} from cart">Remove</button>
               </div>
             </div>
           </div>

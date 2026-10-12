@@ -1,8 +1,8 @@
 # Local Database Setup
 
-This folder contains a minimal local development setup with both PostgreSQL and MongoDB.
+This folder contains a minimal local development setup with PostgreSQL.
 
-## Start both databases
+## Start the database
 
 ```bash
 cd /Users/rashmi/Desktop/Website
@@ -31,29 +31,7 @@ Default credentials:
 - Host: `localhost`
 - Port: `5432`
 
-## MongoDB
-
-Connect with Mongo shell:
-
-```bash
-docker compose exec mongo mongosh -u admin -p admin123 --authenticationDatabase admin
-```
-
-Example query:
-
-```javascript
-use website_db
-show collections
-```
-
-Default credentials:
-
-- User: `admin`
-- Password: `admin123`
-- Host: `localhost`
-- Port: `27017`
-
-## Stop the databases
+## Stop the database
 
 ```bash
 docker compose down

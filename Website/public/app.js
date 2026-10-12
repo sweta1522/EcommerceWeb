@@ -73,6 +73,12 @@ const modalStock = document.getElementById('modalStock');
 const modalSku = document.getElementById('modalSku');
 const modalId = document.getElementById('modalId');
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
 function formatPrice(value) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -153,21 +159,21 @@ function renderProducts(products) {
   productGrid.innerHTML = products
     .map(
       (product) => `
-        <article class="product-card" aria-label="Product ${product.title}">
+        <article class="product-card" aria-label="Product ${escapeHtml(product.title)}">
           <div class="product-image">
             <img
               src="${getProductImage(product)}"
-              alt="${product.title}"
+              alt="${escapeHtml(product.title)}"
               loading="lazy"
               onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80';"
             />
           </div>
           <div class="product-body">
             <div class="product-meta">
-              <span class="badge">#${product.product_id}</span>
-              <span class="category">${product.category}</span>
+              <span class="badge">#${escapeHtml(product.product_id)}</span>
+              <span class="category">${escapeHtml(product.category)}</span>
             </div>
-            <h3>${product.title}</h3>
+            <h3>${escapeHtml(product.title)}</h3>
             <div class="product-info">
               <div>
                 <span class="label">Price</span>
@@ -179,10 +185,10 @@ function renderProducts(products) {
               </div>
             </div>
             <div class="product-footer">
-              <span class="sku">SKU: ${product.sku}</span>
+              <span class="sku">SKU: ${escapeHtml(product.sku)}</span>
               <div class="card-actions">
-                <button type="button" class="card-button secondary" data-product-id="${product.product_id}" aria-label="View details for ${product.title}">View</button>
-                <button type="button" class="card-button add-cart" data-product-id="${product.product_id}" aria-label="Add ${product.title} to cart">Add to cart</button>
+                <button type="button" class="card-button secondary" data-product-id="${escapeHtml(product.product_id)}" aria-label="View details for ${escapeHtml(product.title)}">View</button>
+                <button type="button" class="card-button add-cart" data-product-id="${escapeHtml(product.product_id)}" aria-label="Add ${escapeHtml(product.title)} to cart">Add to cart</button>
               </div>
             </div>
           </div>
@@ -314,7 +320,7 @@ async function fetchProducts() {
     renderProducts(payload.products);
   } catch (error) {
     productGrid.innerHTML = `
-      <div class="empty-state">Unable to load products. ${error.message}</div>
+      <div class="empty-state">Unable to load products. ${escapeHtml(error.message)}</div>
     `;
     console.error(error);
   }

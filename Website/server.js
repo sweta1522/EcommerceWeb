@@ -195,13 +195,20 @@ async function buildSearchIntent(search) {
   return parseIntentResponse(llmResponse, fallbackTerms);
 }
 
-const pool = new Pool({
-  host: process.env.PG_HOST || 'localhost',
-  port: Number(process.env.PG_PORT || 5432),
-  user: process.env.PG_USER || 'postgres',
-  password: process.env.PG_PASSWORD || 'postgres',
-  database: process.env.PG_DATABASE || 'website_db',
-});
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.PG_SSL === 'false' ? false : { rejectUnauthorized: false },
+      }
+    : {
+        host: process.env.PG_HOST || 'localhost',
+        port: Number(process.env.PG_PORT || 5432),
+        user: process.env.PG_USER || 'postgres',
+        password: process.env.PG_PASSWORD || 'postgres',
+        database: process.env.PG_DATABASE || 'website_db',
+      }
+);
 
 async function ensureVectorSupport() {
   try {
@@ -280,14 +287,44 @@ async function ensureProductEmbeddings() {
   }
 }
 
+app.set('trust proxy', 1);
+
+const rateBuckets = new Map();
+function rateLimit({ windowMs = 60000, max = 60 } = {}) {
+  setInterval(() => rateBuckets.clear(), windowMs).unref();
+  return (req, res, next) => {
+    const count = (rateBuckets.get(req.ip) || 0) + 1;
+    rateBuckets.set(req.ip, count);
+    if (count > max) {
+      return res.status(429).json({ error: 'Too many requests' });
+    }
+    next();
+  };
+}
+
 app.use(express.static(publicDir));
+app.use('/api', rateLimit());
 
 app.get('/', (_req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
 });
 
-app.get('/health', (_req, res) => {
-  res.json({ ok: true, database: process.env.PG_DATABASE || 'website_db' });
+app.get('/health', async (_req, res) => {
+  let database = process.env.PG_DATABASE || 'website_db';
+  if (process.env.DATABASE_URL) {
+    try {
+      database = new URL(process.env.DATABASE_URL).pathname.slice(1);
+    } catch {
+      database = 'unknown';
+    }
+  }
+  try {
+    await pool.query('SELECT 1');
+    res.json({ ok: true, database });
+  } catch (error) {
+    console.error('Health check failed:', error.message);
+    res.status(503).json({ ok: false });
+  }
 });
 
 app.get('/api/categories', async (_req, res) => {
@@ -299,10 +336,7 @@ app.get('/api/categories', async (_req, res) => {
     res.json(result.rows.map((row) => row.category));
   } catch (error) {
     console.error('Error fetching categories:', error);
-    res.status(500).json({
-      error: 'Failed to fetch categories',
-      details: error.message,
-    });
+    res.status(500).json({ error: 'Failed to fetch categories' });
   }
 });
 
@@ -311,8 +345,8 @@ app.get('/api/products', async (req, res) => {
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 25));
     const offset = (page - 1) * limit;
-    const category = typeof req.query.category === 'string' ? req.query.category : null;
-    const search = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+    const category = typeof req.query.category === 'string' ? req.query.category.slice(0, 50) : null;
+    const search = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 100) : '';
     const rawSort = req.query.sort === 'price_desc' ? 'price_desc' : 'price_asc';
     const intent = await buildSearchIntent(search);
     const sort = intent.sort || rawSort;
@@ -498,10 +532,7 @@ app.get('/api/products', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching products:', error);
-    res.status(500).json({
-      error: 'Failed to fetch products',
-      details: error.message,
-    });
+    res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
 
@@ -514,9 +545,14 @@ async function startServer() {
   });
 }
 
-startServer();
-
-process.on('SIGINT', async () => {
-  await pool.end();
-  process.exit(0);
+startServer().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
 });
+
+['SIGINT', 'SIGTERM'].forEach((signal) =>
+  process.on(signal, async () => {
+    await pool.end();
+    process.exit(0);
+  })
+);

@@ -14,19 +14,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-
-  mongo:
-    image: mongo:7
-    container_name: website-mongo
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin123
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
+      - ./seed_data.sql:/docker-entrypoint-initdb.d/seed_data.sql
 
 volumes:
   postgres_data:
-  mongo_data:
