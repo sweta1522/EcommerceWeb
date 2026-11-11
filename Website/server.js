@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 4000;
-const publicDir = path.join(__dirname, 'public');
+const publicDir = path.join(__dirname, 'dist');
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 
 const semanticAliases = {
@@ -556,3 +556,5 @@ startServer().catch((error) => {
     process.exit(0);
   })
 );
+
+
